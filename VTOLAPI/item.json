@@ -1,0 +1,11 @@
+﻿{
+  "Title": "VTOLAPI",
+  "Description": "A mod adding the VTOLAPI stuff from the old modloader to make porting easier.",
+  "PreviewImageUrl": "https://vtolvr-mods.com/static/img/Logo.png",
+  "MetaData": {
+    "DllName": "VTOLAPI.dll",
+    "AllowLoadOnStart": true,
+    "ShowOnMainList": false,
+    "DllHash": ""
+  }
+}
