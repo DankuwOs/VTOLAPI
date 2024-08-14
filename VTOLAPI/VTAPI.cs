@@ -127,7 +127,6 @@ public class VTAPI : VtolMod
     /// Returns which vehicle the player is using in a Enum.
     /// </summary>
     /// <returns></returns>
-    [Obsolete]
     public static VTOLVehicles GetPlayersVehicleEnum()
     {
         if (PilotSaveManager.currentVehicle == null)
@@ -155,6 +154,96 @@ public class VTAPI : VtolMod
         }
     }
 
+    public static VTOLVehicles GetVehicleEnum(GameObject vehicle)
+    {
+
+        PlayerVehicle playerVehicle = vehicle.gameObject.GetComponentInChildren<VehicleMaster>(true).playerVehicle;
+
+        if (playerVehicle == null)
+        {
+            Logger.LogError($"Could not find a PlayerVehicle component in gameobject {vehicle.name}");
+            return VTOLVehicles.None;
+        }
+
+        string vehicleName = playerVehicle.vehicleName;
+        switch (vehicleName)
+        {
+            case "AV-42C":
+                return VTOLVehicles.AV42C;
+            case "F/A-26B":
+                return VTOLVehicles.FA26B;
+            case "F-45A":
+                return VTOLVehicles.F45A;
+            case "AH-94":
+                return VTOLVehicles.AH94;
+            case "T-55":
+                return VTOLVehicles.T55;
+            case "EF-24G":
+                return VTOLVehicles.EF24G;
+            default:
+                {
+                    return string.IsNullOrEmpty(vehicleName) ? VTOLVehicles.None : VTOLVehicles.Custom;
+                }
+        }
+    }
+
+    /// <summary>
+    /// Searches the gameobject for a certain child.
+    /// Useful for if you just want a gameobject within a large heiarchy
+    /// </summary>
+    /// <returns></returns>
+    public static GameObject GetChildWithName(GameObject obj, string name)
+    {
+
+
+        Transform[] children = obj.GetComponentsInChildren<Transform>(true);
+        foreach (Transform child in children)
+        {
+            if (child.name == name || child.name.Contains(name + "(clone"))
+            {
+                return child.gameObject;
+            }
+        }
+
+
+        return null;
+    }
+
+    /// <summary>
+    /// Searches the gameobject for a certain interactable by the name of the interactable.
+    /// </summary>
+    /// <returns></returns>
+    public static VRInteractable FindInteractable(string interactableName)
+    {
+        foreach (VRInteractable interactble in VTAPI.GetPlayersVehicleGameObject().GetComponentsInChildren<VRInteractable>(true))
+        {
+            if (interactble.interactableName == interactableName)
+            {
+                return interactble;
+            }
+        }
+
+        Debug.LogError($"Could not find VRinteractable: {interactableName}");
+        return null;
+    }
+
+    /// <summary>
+    /// Searches the gameobject for a certain interactable by the name of the interactable.
+    /// </summary>
+    /// <returns></returns>
+    public static VRInteractable FindInteractable(GameObject gameObject, string interactableName)
+    {
+        foreach (VRInteractable interactble in gameObject.GetComponentsInChildren<VRInteractable>(true))
+        {
+            if (interactble.interactableName == interactableName)
+            {
+                return interactble;
+            }
+        }
+
+        Debug.LogError($"Could not find VRinteractable: {interactableName}");
+        return null;
+    }
 
     public override void UnLoad()
     {
