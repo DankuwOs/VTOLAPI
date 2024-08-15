@@ -157,7 +157,7 @@ public class VTAPI : VtolMod
     public static VTOLVehicles GetVehicleEnum(GameObject vehicle)
     {
 
-        PlayerVehicle playerVehicle = vehicle.gameObject.GetComponentInChildren<VehicleMaster>(true).playerVehicle;
+        PlayerVehicle playerVehicle = vehicle.gameObject.GetComponentInChildren<VehicleMaster>(true)?.playerVehicle;
 
         if (playerVehicle == null)
         {
