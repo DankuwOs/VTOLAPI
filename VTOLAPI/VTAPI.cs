@@ -1,11 +1,8 @@
 ﻿global using static VTOLAPI.Logger;
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using Cysharp.Threading.Tasks;
-using Mod_Loader.Classes;
 using ModLoader.Framework;
 using ModLoader.Framework.Attributes;
 using SteamQueries.Models;
@@ -20,7 +17,7 @@ namespace VTOLAPI;
 public class VTAPI : VtolMod
 {
     public static VTAPI instance { get; private set; }
-
+    
     /// <summary>
     /// This gets invoked when the scene has changed and finished loading. 
     /// This should be the safest way to start running code when a level is loaded.
@@ -42,12 +39,16 @@ public class VTAPI : VtolMod
     private void Awake()
     {
         instance = this;
-
+        
         SceneManager.activeSceneChanged += ActiveSceneChanged;
     }
+    
+    public override void UnLoad()
+    {
+        Log("Bye Bye :~)");
+    }
 
-
-    #region Scene Stuff
+    #region Scenes
 
     private void ActiveSceneChanged(Scene current, Scene next)
     {
@@ -83,9 +84,6 @@ public class VTAPI : VtolMod
             SceneLoaded.Invoke(Scene);
     }
 
-    /// <summary>
-    /// Please don't use this, this is for the mod loader only.
-    /// </summary>
     public void WaitForScenarioReload()
     {
         StartCoroutine(Wait());
@@ -102,9 +100,9 @@ public class VTAPI : VtolMod
             MissionReloaded.Invoke();
     }
 
-
     #endregion
 
+    #region Objects
 
     /// <summary>
     /// [MP Supported]
@@ -118,13 +116,13 @@ public class VTAPI : VtolMod
         {
             return VTOLMPLobbyManager.localPlayerInfo.vehicleObject;
         }
-
+        
         string vehicleName = PilotSaveManager.currentVehicle.vehiclePrefab.name;
         return GameObject.Find($"{vehicleName}(Clone)");
     }
 
     /// <summary>
-    /// Returns which vehicle the player is using in a Enum.
+    /// Returns which vehicle the player is using in an Enum.
     /// </summary>
     /// <returns></returns>
     public static VTOLVehicles GetPlayersVehicleEnum()
@@ -156,12 +154,19 @@ public class VTAPI : VtolMod
 
     public static VTOLVehicles GetVehicleEnum(GameObject vehicle)
     {
+        VehicleMaster vehicleMaster = vehicle.GetComponentInChildren<VehicleMaster>(true);
 
-        PlayerVehicle playerVehicle = vehicle.gameObject.GetComponentInChildren<VehicleMaster>(true).playerVehicle;
+        if (vehicleMaster == null)
+        {
+            LogError($"Could not find a VehicleMaster component in GameObject '{vehicle.name}'");
+            return VTOLVehicles.None;
+        }
+        
+        PlayerVehicle playerVehicle = vehicle.GetComponentInChildren<VehicleMaster>(true)?.playerVehicle;
 
         if (playerVehicle == null)
         {
-            Logger.LogError($"Could not find a PlayerVehicle component in gameobject {vehicle.name}");
+            LogError($"Could not find a PlayerVehicle component in GameObject '{vehicle.name}'");
             return VTOLVehicles.None;
         }
 
@@ -188,14 +193,12 @@ public class VTAPI : VtolMod
     }
 
     /// <summary>
-    /// Searches the gameobject for a certain child.
-    /// Useful for if you just want a gameobject within a large heiarchy
+    /// Searches the GameObject for a certain child.
+    /// Useful for if you just want a GameObject within a large hierarchy
     /// </summary>
     /// <returns></returns>
     public static GameObject GetChildWithName(GameObject obj, string name)
     {
-
-
         Transform[] children = obj.GetComponentsInChildren<Transform>(true);
         foreach (Transform child in children)
         {
@@ -210,47 +213,55 @@ public class VTAPI : VtolMod
     }
 
     /// <summary>
-    /// Searches the gameobject for a certain interactable by the name of the interactable.
+    /// Searches the GameObject for a certain interactable by the name of the interactable.
     /// </summary>
     /// <returns></returns>
     public static VRInteractable FindInteractable(string interactableName)
     {
-        foreach (VRInteractable interactble in VTAPI.GetPlayersVehicleGameObject().GetComponentsInChildren<VRInteractable>(true))
+        GameObject playerGameObject = GetPlayersVehicleGameObject();
+
+        if (playerGameObject == null)
         {
-            if (interactble.interactableName == interactableName)
+            LogError($"Could not find VRInteractable, players game object is null.");
+            return null;
+        }
+        
+        foreach (VRInteractable interactable in GetPlayersVehicleGameObject().GetComponentsInChildren<VRInteractable>(true))
+        {
+            if (interactable.interactableName == interactableName)
             {
-                return interactble;
+                return interactable;
             }
         }
 
-        Debug.LogError($"Could not find VRinteractable: {interactableName}");
+        LogError($"Could not find VRInteractable: '{interactableName}'");
         return null;
     }
 
     /// <summary>
-    /// Searches the gameobject for a certain interactable by the name of the interactable.
+    /// Searches the GameObject for a certain interactable by the name of the interactable.
     /// </summary>
     /// <returns></returns>
     public static VRInteractable FindInteractable(GameObject gameObject, string interactableName)
     {
-        foreach (VRInteractable interactble in gameObject.GetComponentsInChildren<VRInteractable>(true))
+        
+        foreach (VRInteractable interactable in gameObject.GetComponentsInChildren<VRInteractable>(true))
         {
-            if (interactble.interactableName == interactableName)
+            if (interactable.interactableName == interactableName)
             {
-                return interactble;
+                return interactable;
             }
         }
 
-        Debug.LogError($"Could not find VRinteractable: {interactableName}");
+        LogError($"Could not find VRInteractable: '{interactableName}'");
         return null;
     }
 
-    public override void UnLoad()
-    {
+    #endregion
 
-    }
+    #region SteamItems
 
-    public IReadOnlyCollection<SteamItem> FindSteamItems()
+    public static IReadOnlyCollection<SteamItem> FindSteamItems()
     {
         var currentPage = 1;
         const int maxPages = 100;
@@ -272,7 +283,7 @@ public class VTAPI : VtolMod
 
             if (!pageResults.result.HasValues)
             {
-                Debug.LogWarning("Get Subscribed Items didn't have any values");
+                LogWarn("Get Subscribed Items didn't have any values");
                 break;
             }
 
@@ -292,35 +303,37 @@ public class VTAPI : VtolMod
         return returnValue;
     }
 
-    public IReadOnlyCollection<SteamItem> FindLocalItems()
+    public static IReadOnlyCollection<SteamItem> FindLocalItems()
     {
         return ModLoader.ModLoader.Instance.FindLocalItems();
     }
-
-    public bool IsItemLoaded(string directory)
+    
+    public static bool IsItemLoaded(string directory)
     {
         return ModLoader.ModLoader.Instance.IsItemLoaded(directory);
     }
 
     // Incase somebody needs it.
-    public UniTask<bool> TryLoadSteamItem(SteamItem item)
+    public static UniTask<bool> TryLoadSteamItem(SteamItem item)
     {
         return ModLoader.ModLoader.Instance.LoadSteamItem(item);
     }
 
-    public void LoadSteamItem(SteamItem item)
+    public static void LoadSteamItem(SteamItem item)
     {
         ModLoader.ModLoader.Instance.LoadSteamItem(item);
     }
 
     // Incase somebody needs it.
-    public UniTask TaskDisableSteamItem(SteamItem item)
+    public static UniTask TaskDisableSteamItem(SteamItem item)
     {
         return ModLoader.ModLoader.Instance.DisableSteamItem(item);
     }
     
-    public void DisableSteamItem(SteamItem item)
+    public static void DisableSteamItem(SteamItem item)
     {
         ModLoader.ModLoader.Instance.DisableSteamItem(item);
     }
+
+    #endregion
 }

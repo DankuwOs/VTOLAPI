@@ -6,13 +6,18 @@ public class Logger
 {
     private static readonly string ModName = "VTOLAPI";
 
-    public static void Log(string text)
+    public static void Log(object message)
     {
-        Debug.Log($"[{ModName}]: {text}");
+        Debug.Log($"[{ModName}] [INFO]: {message.ToString()}");
     }
 
-    public static void LogError(string text)
+    public static void LogWarn(object obj)
     {
-        Debug.LogError($"[{ModName}]: {text}");
+        Debug.LogWarning($"[{ModName}] [WARN]: {obj}");
+    }
+    
+    public static void LogError(object message)
+    {
+        Debug.LogError($"[{ModName}] [ERROR]: {message.ToString()}");
     }
 }
