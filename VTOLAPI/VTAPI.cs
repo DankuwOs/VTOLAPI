@@ -162,7 +162,7 @@ public class VTAPI : VtolMod
             return VTOLVehicles.None;
         }
         
-        PlayerVehicle playerVehicle = vehicle.GetComponentInChildren<VehicleMaster>(true)?.playerVehicle;
+        PlayerVehicle playerVehicle = vehicleMaster.playerVehicle;
 
         if (playerVehicle == null)
         {
