@@ -275,7 +275,7 @@ public class VTAPI : VtolMod
                 break;
             }
 
-            var pageResults = ModLoader.ModLoader.Instance._steamQueries.GetSubscribedItems(currentPage);
+            var pageResults = ModLoader.SteamQuery.SteamQueries.Instance.GetSubscribedItems(currentPage);
             if (pageResults.result == null)
             {
                 break;
