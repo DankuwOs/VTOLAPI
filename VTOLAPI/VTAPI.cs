@@ -266,8 +266,8 @@ public class VTAPI : VtolMod
     /// <summary>
     /// Registers a variable that other mods can access to modify your variables.
     /// </summary>
-    /// <param name="modId">Mod ID must be specific to your mod</param>
-    /// <param name="modVariable">Class containing</param>
+    /// <param name="modId">Mod ID must be specific to your mod.</param>
+    /// <param name="modVariable">Class that contains the actions to modify the variable.</param>
     /// <code>
     /// string epicString = "C-137 Is soooo coool, i love his A-10 mod :~)";
     /// VTModVariable modVariable = new VTModVariable("Epic Float", epicString, OnSetValue, OnGetValue);
