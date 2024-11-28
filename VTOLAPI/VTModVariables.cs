@@ -49,7 +49,6 @@ public class VTModVariables
     /// <returns>True if variable is accessible, not an action, and value isn't null.</returns>
     public bool TryGetValue(string variableName, out object value)
     {
-        Log($"Trying to get variable '{modId}:{variableName}'");
         value = null;
         
         if (Unregistered)
@@ -62,7 +61,6 @@ public class VTModVariables
         {
             if (modVariable.TryGetValue(out value))
             {
-                Log($"Got variable '{modId}:{variableName}={value}'");
                 return true;
             }
 
@@ -84,12 +82,10 @@ public class VTModVariables
             return false;
         }
         
-        Log($"Trying to set variable '{modId}:{variableName}' to '{value}'");
         if (_modVariables.TryGetValue(variableName, out var modVariable))
         {
             if (modVariable.TrySetValue(value))
             {
-                Log($"Set variable '{modId}:{variableName}={value}'");
                 return true;
             }
 
@@ -112,7 +108,6 @@ public class VTModVariables
             return;
         }
         
-        Log($"Trying to invoke variable '{modId}:{variableName}'");
         if (_modVariables.TryGetValue(variableName, out var modVariable))
         {
             modVariable.Invoke();

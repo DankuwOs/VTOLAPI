@@ -1,4 +1,5 @@
 ﻿global using static VTOLAPI.Logger;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,6 +7,7 @@ using Cysharp.Threading.Tasks;
 using ModLoader.Framework;
 using ModLoader.Framework.Attributes;
 using SteamQueries.Models;
+using Steamworks;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
@@ -47,6 +49,7 @@ public class VTAPI : VtolMod
     
     public override void UnLoad()
     {
+        SceneManager.activeSceneChanged -= ActiveSceneChanged;
         Log("Bye Bye :~)");
     }
 
