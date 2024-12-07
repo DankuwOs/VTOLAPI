@@ -58,6 +58,8 @@ public class VTAPI : VtolMod
     private void ActiveSceneChanged(Scene current, Scene next)
     {
         Log($"Active Scene Changed to [{next.buildIndex}]{next.name}");
+        
+        
         var scene = (VTScenes)next.buildIndex;
         switch (scene)
         {
@@ -111,7 +113,7 @@ public class VTAPI : VtolMod
 
     /// <summary>
     /// [MP Supported]
-    /// Searches for the game object of the player by using the prefab name appending (Clone).
+    /// Searches for the game object of the player by using the flight scene manager.
     /// For multiplayer it uses the lobby manager to get the local player
     /// </summary>
     /// <returns></returns>
@@ -122,8 +124,7 @@ public class VTAPI : VtolMod
             return VTOLMPLobbyManager.localPlayerInfo.vehicleObject;
         }
         
-        string vehicleName = PilotSaveManager.currentVehicle.vehiclePrefab.name;
-        return GameObject.Find($"{vehicleName}(Clone)");
+        return FlightSceneManager.instance?.playerActor != null ? FlightSceneManager.instance.playerActor.gameObject : null;
     }
 
     /// <summary>
