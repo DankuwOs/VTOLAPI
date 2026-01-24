@@ -5,7 +5,7 @@ namespace VTOLAPI;
 [HarmonyPatch(typeof(VTMapManager), nameof(VTMapManager.RestartCurrentScenario))]
 public class Patch_VTMapManager
 {
-    static void Postfix(VTMapManager __instance)
+    public static void Postfix()
     {
         VTAPI.instance.WaitForScenarioReload();
     }
