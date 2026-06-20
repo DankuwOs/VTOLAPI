@@ -352,7 +352,13 @@ public class VTAPI : VtolMod
 
     #region SteamItems
 
+    [Obsolete("Synchronous version no longer works for some reason, switch to FindSteamItemsAsync.", true)]
     public static IReadOnlyCollection<SteamItem> FindSteamItems()
+    {
+        throw new Exception("Please use FindSteamItemsAsync instead, synchronous method no longer works.");
+    }
+    
+    public static async UniTask<IReadOnlyCollection<SteamItem>> FindSteamItemsAsync()
     {
         var currentPage = 1;
         const int maxPages = 100;
@@ -366,19 +372,19 @@ public class VTAPI : VtolMod
                 break;
             }
 
-            var pageResults = ModLoader.SteamQuery.SteamQueries.Instance.GetSubscribedItems(currentPage);
-            if (pageResults.result == null)
+            var pageResults = await ModLoader.SteamQuery.SteamQueries.Instance.GetSubscribedItems(currentPage);
+            if (pageResults == null)
             {
                 break;
             }
 
-            if (!pageResults.result.HasValues)
+            if (!pageResults.HasValues)
             {
                 LogWarn("Get Subscribed Items didn't have any values");
                 break;
             }
 
-            var visibleItems = pageResults.result.Items.ToArray();
+            var visibleItems = pageResults.Items.ToArray();
 
             if (!visibleItems.Any())
             {
@@ -389,6 +395,7 @@ public class VTAPI : VtolMod
             returnValue.AddRange(visibleItems);
 
             currentPage++;
+            await UniTask.WaitForEndOfFrame(instance);
         }
 
         return returnValue;
