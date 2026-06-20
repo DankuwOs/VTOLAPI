@@ -352,10 +352,15 @@ public class VTAPI : VtolMod
 
     #region SteamItems
 
-    [Obsolete("Synchronous version no longer works for some reason, switch to FindSteamItemsAsync.", true)]
+    [Obsolete("Synchronous version no longer works for some reason, switch to FindSteamItemsCoroutine or FindSteamItemsAsync.", true)]
     public static IReadOnlyCollection<SteamItem> FindSteamItems()
     {
-        throw new Exception("Please use FindSteamItemsAsync instead, synchronous method no longer works.");
+        throw new Exception("Please use FindSteamItemsCoroutine or FindSteamItemsAsync instead, synchronous method no longer works.");
+    }
+
+    public static IEnumerator FindSteamItemsCoroutine(Action<IReadOnlyCollection<SteamItem>> resultHandler)
+    {
+        yield return FindSteamItemsAsync().ToCoroutine(resultHandler);
     }
     
     public static async UniTask<IReadOnlyCollection<SteamItem>> FindSteamItemsAsync()
