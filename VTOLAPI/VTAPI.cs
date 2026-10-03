@@ -45,15 +45,78 @@ public class VTAPI : VtolMod
     
     private static Dictionary<string, VTModVariables> ModVariables = new Dictionary<string, VTModVariables>();
 
+    /// <summary>
+    /// Array containing all of the shaders from the original game, before any mods have loaded their own.
+    /// </summary>
+    public static Shader[] AllVanillaShaders;
 
-    private static Shader[] AllLoadedShaders;
+    
+    /// <summary>
+    /// List containing all of the HPEquippables from the original game, before any mods have loaded their own.
+    /// </summary>
+    public static readonly List<HPEquippable> AllVanillaHPEquips = new List<HPEquippable>();
+    
+    /// <summary>
+    /// List containing all of the Missiles from the original game, before any mods have loaded their own.
+    /// </summary>
+    public static readonly List<Missile> AllVanillaMissiles = new List<Missile>();
     
 
     private void Awake()
     {
         instance = this;
 
-        AllLoadedShaders = Resources.FindObjectsOfTypeAll<Shader>();
+        AllVanillaShaders = Resources.FindObjectsOfTypeAll<Shader>();
+
+        
+        // Grab HPEquips and Missiles from Player Vehicles
+        foreach (var pv in VTResources.playerVehicles.playerVehicles.Where(pv => GetVehicleEnum(pv.vehiclePrefab) != VTOLVehicles.Custom))
+        {
+            foreach (var pvEquipPrefab in pv.allEquipPrefabs)
+            {
+                var hpEquippable = pvEquipPrefab.GetComponent<HPEquippable>();
+                
+                if (AllVanillaHPEquips.All(hpEquip => hpEquip.name != hpEquippable.name))
+                    AllVanillaHPEquips.Add(hpEquippable);
+
+                foreach (var missileLauncher in hpEquippable.GetComponentsInChildren<MissileLauncher>(true))
+                {
+                    if (AllVanillaMissiles.All(missile => missile.name != missileLauncher.missilePrefab.name))
+                        AllVanillaMissiles.Add(missileLauncher.missilePrefab.GetComponent<Missile>());
+                }
+            }
+        }
+        
+        // Grab HPEquips and Missiles from AI Units
+        UnitCatalogue.UpdateCatalogue();
+        foreach (var unitPrefabKvP in UnitCatalogue.unitPrefabs)
+        {
+            
+            foreach (var missileLauncher in unitPrefabKvP.Value.GetComponentsInChildren<MissileLauncher>(true))
+            {
+                if (AllVanillaMissiles.All(missile => missile.name != missileLauncher.missilePrefab.name))
+                    AllVanillaMissiles.Add(missileLauncher.missilePrefab.GetComponent<Missile>());
+            }
+            
+            var unitSpawnEquippable = unitPrefabKvP.Value.GetComponent<AIUnitSpawnEquippable>();
+            if (!unitSpawnEquippable)
+                continue;
+            
+            foreach (var equipPrefab in unitSpawnEquippable.equipPrefabs)
+            {
+                var hpEquippable = equipPrefab.GetComponent<HPEquippable>();
+                
+                if (AllVanillaHPEquips.All(hpEquip => hpEquip.name != hpEquippable.name))
+                    AllVanillaHPEquips.Add(hpEquippable);
+                
+                
+                foreach (var missileLauncher in hpEquippable.GetComponentsInChildren<MissileLauncher>(true))
+                {
+                    if (AllVanillaMissiles.All(missile => missile.name != missileLauncher.missilePrefab.name))
+                        AllVanillaMissiles.Add(missileLauncher.missilePrefab.GetComponent<Missile>());
+                }
+            }
+        }
         
         SceneManager.activeSceneChanged += ActiveSceneChanged;
     }
@@ -423,15 +486,15 @@ public class VTAPI : VtolMod
         {
             int idx = s.name.ToLower().IndexOf("(danku", StringComparison.Ordinal);
             string shaderName = s.name.Remove(idx).TrimEnd(' ');
-            if (AllLoadedShaders.Any(shader => shaderName == shader.name))
+            if (AllVanillaShaders.Any(shader => shaderName == shader.name))
             {
-                result = AllLoadedShaders.First(shader => shaderName == shader.name);
+                result = AllVanillaShaders.First(shader => shaderName == shader.name);
                 return true;
             }
         }
-        if (AllLoadedShaders.Any(shader => s.name == shader.name))
+        if (AllVanillaShaders.Any(shader => s.name == shader.name))
         {
-            result = AllLoadedShaders.First(shader => s.name == shader.name);
+            result = AllVanillaShaders.First(shader => s.name == shader.name);
             return true;
         }
         
